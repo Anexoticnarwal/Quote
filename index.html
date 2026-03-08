@@ -5,15 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cosmos Infinity</title>
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.08); --accent: #4fc3f7; }
+        :root { 
+            --glass: rgba(255, 255, 255, 0.08); 
+            --accent: #4fc3f7; 
+            --bg: #050508;
+        }
         
         body, html {
-            margin: 0; padding: 0; background: #000; height: 100vh;
+            margin: 0; padding: 0; background: var(--bg); height: 100vh;
             scroll-snap-type: y mandatory; overflow-y: scroll;
-            -webkit-overflow-scrolling: touch; font-family: -apple-system, sans-serif; color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff;
         }
 
-        /* Container for all the slides we will generate */
+        /* Fixed Navigation Pill */
+        nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: rgba(20, 20, 25, 0.7);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 5px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; gap: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        nav button {
+            background: transparent; border: none; color: #fff; padding: 8px 18px;
+            border-radius: 40px; cursor: pointer; font-size: 0.8rem; font-weight: 500;
+            transition: 0.3s; opacity: 0.6;
+        }
+
+        nav button.active { background: var(--accent); color: #000; opacity: 1; }
+
         #feed { width: 100%; }
 
         section { 
@@ -22,91 +42,139 @@
         }
 
         .glass-card { 
-            width: 92vw; height: 86vh; background: var(--glass); 
+            width: 92vw; height: 82vh; background: var(--glass); 
             backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
             border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); 
             overflow: hidden; display: flex; flex-direction: column; 
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8); margin-top: 40px;
         }
 
         .img-container { 
-            height: 50%; width: 100%; background: #000; 
-            overflow: auto; display: flex; align-items: center; justify-content: center; 
+            height: 55%; width: 100%; background: #000; 
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
 
-        .img-container img { max-width: 100%; height: auto; display: block; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
 
         .data-drawer { 
             flex: 1; padding: 25px; background: rgba(10, 10, 15, 0.85); 
             overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        h2 { margin: 0; font-size: 1.3rem; color: var(--accent); }
-        .tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin: 5px 0 12px; }
+        h2 { margin: 0; font-size: 1.2rem; color: var(--accent); line-height: 1.3; }
+        .tag { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin: 8px 0 15px; }
         .text { font-size: 0.9rem; line-height: 1.6; color: #ccc; }
 
-        .loader-text { position: fixed; top: 50%; width: 100%; text-align: center; opacity: 0.5; font-size: 12px; letter-spacing: 2px; }
+        .loader-text { position: fixed; top: 50%; width: 100%; text-align: center; opacity: 0.5; font-size: 10px; letter-spacing: 3px; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <div id="feed">
-        </div>
+    <nav id="topicMenu">
+        <button class="active" onclick="switchTopic('space', this)">SPACE</button>
+        <button onclick="switchTopic('art', this)">ART</button>
+        <button onclick="switchTopic('anime', this)">ANIME</button>
+    </nav>
 
-    <div id="status" class="loader-text">INITIALIZING DEEP SPACE LINK...</div>
+    <div id="status" class="loader-text">SYNCING WITH DATA STREAM...</div>
+    <div id="feed"></div>
 
     <script>
         const feed = document.getElementById('feed');
         const status = document.getElementById('status');
+        let currentTopic = 'space';
+        let isLoading = false;
 
-        // Function to create a random date string
-        function getRandomDate() {
-            const start = new Date(2015, 0, 1).getTime();
-            const end = new Date().getTime();
-            return new Date(start + Math.random() * (end - start)).toISOString().split('T')[0];
-        }
+        // Configuration for different APIs
+        const topics = {
+            space: {
+                fetch: async () => {
+                    const date = new Date(Date.now() - Math.random() * 1e11).toISOString().split('T')[0];
+                    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${date}`);
+                    const d = await res.json();
+                    return d.media_type === 'image' ? { title: d.title, img: d.url, text: d.explanation, tag: d.date } : null;
+                }
+            },
+            art: {
+                fetch: async () => {
+                    const page = Math.floor(Math.random() * 100) + 1;
+                    const res = await fetch(`https://api.artic.edu/api/v1/artworks?page=${page}&limit=1&fields=id,title,image_id,artist_display`);
+                    const d = await res.json();
+                    const item = d.data[0];
+                    if (!item.image_id) return null;
+                    return {
+                        title: item.title,
+                        img: `https://www.artic.edu/iiif/2/${item.image_id}/full/843,/0/default.jpg`,
+                        text: item.artist_display,
+                        tag: "Art Institute of Chicago"
+                    };
+                }
+            },
+            anime: {
+                fetch: async () => {
+                    const res = await fetch(`https://api.jikan.moe/v4/random/anime`);
+                    const d = await res.json();
+                    const item = d.data;
+                    return {
+                        title: item.title,
+                        img: item.images.jpg.large_image_url,
+                        text: item.synopsis || "No description available.",
+                        tag: `MAL Score: ${item.score || 'N/A'}`
+                    };
+                }
+            }
+        };
 
-        // The "Factory" that builds a new slide
         async function createSlide() {
+            if (isLoading) return;
+            isLoading = true;
+            status.style.display = 'block';
+
             try {
-                const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${getRandomDate()}`);
-                const data = await response.json();
+                let data = null;
+                while (!data) { data = await topics[currentTopic].fetch(); }
 
-                // If it's a video, skip and try again
-                if (data.media_type !== 'image') return createSlide();
-
-                // Create the HTML structure for the new slide
                 const section = document.createElement('section');
                 section.innerHTML = `
                     <div class="glass-card">
-                        <div class="img-container">
-                            <img src="${data.url}" alt="${data.title}">
-                        </div>
+                        <div class="img-container"><img src="${data.img}" alt="content"></div>
                         <div class="data-drawer">
                             <h2>${data.title}</h2>
-                            <p class="tag">${data.date} • NASA ARCHIVE</p>
-                            <p class="text">${data.explanation}</p>
+                            <p class="tag">${data.tag}</p>
+                            <p class="text">${data.text}</p>
                         </div>
                     </div>
                 `;
                 feed.appendChild(section);
-                status.style.display = 'none'; // Hide the loading text once first slide is in
+                status.style.display = 'none';
             } catch (err) {
-                console.error("NASA Link Interrupted");
+                console.error("Stream interrupted", err);
+            } finally {
+                isLoading = false;
             }
         }
 
-        // INITIAL LOAD: Create 5 slides immediately
+        function switchTopic(topic, btn) {
+            if (currentTopic === topic) return;
+            currentTopic = topic;
+            
+            // UI Updates
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Reset Feed
+            feed.innerHTML = '';
+            window.scrollTo(0, 0);
+            init();
+        }
+
         async function init() {
-            for (let i = 0; i < 5; i++) {
-                await createSlide();
-            }
+            for (let i = 0; i < 3; i++) await createSlide();
         }
 
-        // INFINITE SCROLL: When you get near the bottom, make 2 more slides
+        // Infinite Scroll
         window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-                createSlide();
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
                 createSlide();
             }
         });
