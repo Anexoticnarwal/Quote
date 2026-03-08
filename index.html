@@ -2,154 +2,177 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>NASA Space Swipe</title>
+    <title>Cosmos Immersive</title>
     <style>
-        :root { --bg: #0b0d17; --card: #161b22; --text: #e6edf3; --accent: #4fc3f7; }
+        :root { --glass: rgba(255, 255, 255, 0.1); --glass-border: rgba(255, 255, 255, 0.2); }
         
-        body { 
-            background-color: var(--bg); color: var(--text); 
-            font-family: -apple-system, system-ui, sans-serif; 
-            margin: 0; height: 100vh; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; overflow: hidden; 
-            touch-action: none; 
-        }
-        
-        #card-container { position: relative; width: 90vw; max-width: 400px; height: 620px; perspective: 1000px; }
-        
-        .card {
-            position: absolute; width: 100%; height: 100%; background: var(--card);
-            border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;
-            border: 1px solid #30363d; transition: transform 0.1s linear, opacity 0.3s ease;
-            will-change: transform, opacity;
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000; color: #fff; font-family: 'Inter', -apple-system, sans-serif;
+            overflow: hidden; touch-action: none;
         }
 
-        .img-container { width: 100%; height: 55%; border-radius: 16px; overflow: hidden; background: #000; position: relative; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .info { padding: 15px 5px; text-align: center; flex-grow: 1; overflow-y: auto; }
-        .title { font-size: 1.1rem; font-weight: bold; color: var(--accent); margin-bottom: 5px; }
-        .date { font-size: 0.8rem; opacity: 0.5; margin-bottom: 10px; }
-        
-        /* New Description Styling */
-        .description { font-size: 0.85rem; line-height: 1.4; text-align: left; display: none; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; }
+        /* Full Screen Image Background */
+        #bg-image {
+            position: absolute; width: 100%; height: 100%;
+            object-fit: cover; filter: brightness(0.6) blur(5px);
+            transition: opacity 0.8s ease-in-out;
+        }
 
-        .controls { display: flex; gap: 10px; margin-top: auto; }
-        .btn { flex: 1; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
-        .btn-blue { background: #007bff; color: white; }
-        .btn-gray { background: #30363d; color: white; }
+        #app-container {
+            position: relative; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            perspective: 1200px; z-index: 2;
+        }
 
-        .loader { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; position: absolute; top: 40%; left: 50%; margin: -20px 0 0 -20px; }
+        /* The 3D Glass Tile */
+        .glass-tile {
+            width: 88vw; height: 75vh;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            transition: transform 0.1s linear, opacity 0.4s ease;
+            transform-style: preserve-3d;
+        }
+
+        .main-img {
+            width: 100%; height: 100%; object-fit: cover;
+            pointer-events: none;
+        }
+
+        /* Floating Info Overlay */
+        .header-info {
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        .header-info h1 { margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+        .header-info p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; }
+
+        /* Sleek Pull-Up Drawer */
+        #drawer {
+            position: absolute; bottom: -60%; left: 0; width: 100%; height: 70%;
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            border-radius: 30px 30px 0 0;
+            padding: 20px; box-sizing: border-box;
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 10;
+        }
+        .drawer-handle {
+            width: 40px; height: 5px; background: rgba(255,255,255,0.3);
+            border-radius: 10px; margin: 0 auto 20px;
+        }
+        .drawer-content { height: 100%; overflow-y: auto; padding-bottom: 40px; }
+        .drawer-content h2 { font-size: 1.2rem; margin-top: 0; color: #4fc3f7; }
+        .drawer-content p { font-size: 0.95rem; line-height: 1.6; opacity: 0.9; }
+
+        /* Loading Spinner */
+        .loader {
+            position: absolute; border: 3px solid transparent; border-top: 3px solid #fff;
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div style="margin-bottom: 10px; font-size: 0.7rem; letter-spacing: 2px; opacity: 0.5;">SWIPE TO TRAVEL</div>
+    <img id="bg-image" src="">
 
-    <div id="card-container">
-        <div id="space-card" class="card">
-            <div id="loader" class="loader"></div>
-            <div id="content" style="visibility:hidden; height: 100%; display: flex; flex-direction: column;">
-                <div class="img-container">
-                    <img id="space-img" src="" alt="Space">
-                </div>
-                <div class="info">
-                    <div id="space-title" class="title">...</div>
-                    <div id="space-date" class="date"></div>
-                    <div id="space-desc" class="description"></div>
-                    <div class="controls">
-                        <button class="btn btn-gray" id="info-btn">More Info</button>
-                        <button class="btn btn-blue" id="view-btn">Full Image</button>
-                    </div>
-                </div>
+    <div id="app-container">
+        <div id="loader" class="loader"></div>
+        <div id="main-tile" class="glass-tile" style="opacity: 0;">
+            <div class="header-info">
+                <p id="space-date"></p>
+                <h1 id="space-title"></h1>
             </div>
+            <img id="space-img" class="main-img" src="">
+        </div>
+    </div>
+
+    <div id="drawer">
+        <div class="drawer-handle" id="handle"></div>
+        <div class="drawer-content">
+            <h2 id="desc-title">About this view</h2>
+            <p id="space-desc"></p>
+            <button onclick="toggleDrawer()" style="background:none; border: 1px solid #fff; color:#fff; padding:10px; border-radius:5px; width:100%;">Close Details</button>
         </div>
     </div>
 
     <script>
-        const card = document.getElementById('space-card');
-        const imgEl = document.getElementById('space-img');
+        const tile = document.getElementById('main-tile');
+        const bgImg = document.getElementById('bg-image');
+        const spaceImg = document.getElementById('space-img');
         const titleEl = document.getElementById('space-title');
         const dateEl = document.getElementById('space-date');
         const descEl = document.getElementById('space-desc');
+        const drawer = document.getElementById('drawer');
         const loader = document.getElementById('loader');
-        const content = document.getElementById('content');
-        const infoBtn = document.getElementById('info-btn');
-        const viewBtn = document.getElementById('view-btn');
 
-        let startX = 0, currentX = 0;
-
-        function getRandomDate() {
-            const start = new Date(2016, 0, 1);
-            const end = new Date();
-            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0];
-        }
+        let startX = 0, currentX = 0, isDrawerOpen = false;
 
         async function fetchSpace() {
             loader.style.display = 'block';
-            content.style.visibility = 'hidden';
-            descEl.style.display = 'none'; // Reset description view
-            infoBtn.innerText = "More Info";
-            
-            const url = `https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${getRandomDate()}`;
+            tile.style.opacity = '0';
+            const randomDate = new Date(2016, 0, 1).getTime() + Math.random() * (new Date().getTime() - new Date(2016,0,1).getTime());
+            const dateStr = new Date(randomDate).toISOString().split('T')[0];
             
             try {
-                const response = await fetch(url);
-                const data = await response.json();
+                const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${dateStr}`);
+                const data = await res.json();
                 if(data.media_type !== 'image') return fetchSpace();
 
-                imgEl.src = data.url;
+                spaceImg.src = data.url;
+                bgImg.src = data.url;
                 titleEl.innerText = data.title;
                 dateEl.innerText = data.date;
                 descEl.innerText = data.explanation;
-                
-                viewBtn.onclick = () => window.open(data.hdurl || data.url, '_blank');
-                infoBtn.onclick = () => {
-                    const isVisible = descEl.style.display === 'block';
-                    descEl.style.display = isVisible ? 'none' : 'block';
-                    infoBtn.innerText = isVisible ? "More Info" : "Hide Info";
-                };
 
-                imgEl.onload = () => {
+                spaceImg.onload = () => {
                     loader.style.display = 'none';
-                    content.style.visibility = 'visible';
+                    tile.style.opacity = '1';
                 };
-            } catch (err) { fetchSpace(); }
+            } catch (e) { fetchSpace(); }
         }
 
-        card.addEventListener('touchstart', e => { startX = e.touches[0].clientX; card.style.transition = 'none'; });
+        function toggleDrawer() {
+            isDrawerOpen = !isDrawerOpen;
+            drawer.style.transform = isDrawerOpen ? 'translateY(-60%)' : 'translateY(0)';
+        }
 
-        card.addEventListener('touchmove', e => {
-            currentX = e.touches[0].clientX - startX;
-            card.style.transform = `translateX(${currentX}px) rotate(${currentX / 15}deg)`;
-            card.style.opacity = 1 - (Math.abs(currentX) / 600); // Fades as you swipe
+        // 3D Tilt & Swipe Logic
+        tile.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+            tile.style.transition = 'none';
         });
 
-        card.addEventListener('touchend', () => {
-            if (Math.abs(currentX) > 100) {
-                // Swipe & Fade out
-                card.style.transition = 'transform 0.4s ease-in, opacity 0.4s ease-in';
-                card.style.transform = `translateX(${currentX > 0 ? 500 : -500}px) rotate(${currentX / 5}deg)`;
-                card.style.opacity = '0';
-                
-                setTimeout(() => {
-                    fetchSpace();
-                    card.style.transition = 'none';
-                    card.style.transform = 'scale(0.95)';
-                    card.style.opacity = '0';
-                    setTimeout(() => {
-                        card.style.transition = 'transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.6s ease-out';
-                        card.style.transform = 'scale(1)';
-                        card.style.opacity = '1';
-                    }, 50);
-                }, 400);
+        tile.addEventListener('touchmove', e => {
+            currentX = e.touches[0].clientX - startX;
+            const rotateY = currentX / 10;
+            const rotateX = (e.touches[0].clientY - window.innerHeight/2) / -20;
+            tile.style.transform = `translateX(${currentX}px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+            tile.style.opacity = 1 - (Math.abs(currentX) / 700);
+        });
+
+        tile.addEventListener('touchend', () => {
+            if (Math.abs(currentX) > 120) {
+                tile.style.transition = 'transform 0.5s ease-in, opacity 0.3s';
+                tile.style.transform = `translateX(${currentX > 0 ? 800 : -800}px) rotateY(${currentX/5}deg)`;
+                setTimeout(() => { fetchSpace(); }, 300);
             } else {
-                card.style.transition = 'transform 0.3s ease-out, opacity 0.3s';
-                card.style.transform = 'translateX(0) rotate(0)';
-                card.style.opacity = '1';
+                tile.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s';
+                tile.style.transform = 'rotateY(0) rotateX(0) translateX(0)';
+                tile.style.opacity = '1';
+                // If it was just a tap (low movement), toggle drawer
+                if (Math.abs(currentX) < 5) toggleDrawer();
             }
             currentX = 0;
         });
