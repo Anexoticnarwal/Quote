@@ -2,232 +2,144 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Cosmos Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos Lite Pro</title>
     <style>
-        :root { 
-            --glass: rgba(255, 255, 255, 0.08); 
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --accent: #4fc3f7;
-        }
-        
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: #000; color: #fff; font-family: 'Inter', -apple-system, sans-serif;
-            overflow: hidden; touch-action: none;
+        body, html {
+            margin: 0; padding: 0;
+            background: #000;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+            font-family: -apple-system, system-ui, sans-serif;
         }
 
-        /* Ambient Background Blur */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; filter: brightness(0.4) blur(40px);
-            z-index: 0; transition: opacity 1s ease;
+        section {
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        #app-viewport {
-            position: relative; width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2; perspective: 1500px;
-        }
-
-        /* The Professional Glass Tile */
         .glass-card {
-            position: absolute; width: 92vw; height: 80vh;
-            background: var(--glass);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px; overflow: hidden;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-            display: flex; flex-direction: column;
-            will-change: transform, opacity;
-            transform-origin: center center;
-            /* Hardware Acceleration */
-            transform-style: preserve-3d;
+            width: 90vw;
+            height: 82vh;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 35px;
+            border: 1px solid rgba(255,255,255,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
         }
 
-        .main-img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.3s ease;
+        /* Image Box - Optimized for 0.8s load & Pinch-to-Zoom */
+        .img-box {
+            flex: 1;
+            overflow: auto; 
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Content Overlay */
-        .card-header {
-            position: absolute; top: 0; left: 0; right: 0;
-            padding: 30px 25px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
-            pointer-events: none;
+        .img-box img {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
-        .card-header h1 { margin: 0; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
-        .card-header p { margin: 8px 0 0; font-size: 0.75rem; opacity: 0.6; letter-spacing: 2px; }
 
-        /* Sleek Info Drawer */
-        #drawer {
-            position: fixed; bottom: -70%; left: 0; width: 100%; height: 75%;
-            background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border-top: 1px solid var(--glass-border);
-            border-radius: 40px 40px 0 0;
-            padding: 30px; box-sizing: border-box;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
+        /* The Slide-Up Info Tab (Pure CSS) */
+        .info-tab {
+            padding: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            color: #fff;
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            cursor: pointer;
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .drawer-handle {
-            width: 50px; height: 6px; background: rgba(255,255,255,0.2);
-            border-radius: 10px; margin: 0 auto 25px;
-        }
-        .drawer-content { height: 100%; overflow-y: auto; color: #ccc; line-height: 1.7; font-size: 1rem; }
-        .drawer-content h2 { color: var(--accent); margin-top: 0; }
 
-        /* Skeleton Shimmer Effect */
-        .skeleton {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            background-size: 200% 100%; animation: shimmer 2s infinite;
+        /* Tap to Expand Effect */
+        .info-tab:active, .info-tab:focus {
+            transform: translateY(-50px);
         }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .handle {
+            width: 40px; height: 4px; background: rgba(255,255,255,0.3);
+            border-radius: 10px; margin: 0 auto 15px;
+        }
+
+        h2 { margin: 0; font-size: 1.2rem; color: #4fc3f7; }
+        .date { font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .facts { font-size: 0.85rem; line-height: 1.5; margin-top: 15px; opacity: 0.9; }
+
+        .swipe-tip {
+            position: fixed; top: env(safe-area-inset-top, 20px); width: 100%;
+            text-align: center; color: #fff; font-size: 10px;
+            letter-spacing: 3px; opacity: 0.4; pointer-events: none; z-index: 10;
+        }
     </style>
 </head>
 <body>
 
-    <img id="bg-canvas" src="">
+    <div class="swipe-tip">UP FOR NEXT • PINCH TO ZOOM</div>
 
-    <div id="app-viewport">
-        <div id="next-card" class="glass-card" style="transform: scale(0.9) translateY(100px); opacity: 0; z-index: 1;">
-            <div class="skeleton"></div>
-        </div>
-
-        <div id="current-card" class="glass-card" style="z-index: 2;">
-            <div class="card-header">
-                <p id="c-date">LOADING...</p>
-                <h1 id="c-title">Fetching Cosmos</h1>
+    <section>
+        <div class="glass-card">
+            <div class="img-box">
+                <img src="https://images.weserv.nl/?url=https://apod.nasa.gov/apod/image/2309/MoonJupiter_Zhu_1080.jpg&w=600&q=75&output=webp" alt="Jupiter and Moon">
             </div>
-            <img id="c-img" class="main-img" src="">
+            <div class="info-tab" tabindex="0">
+                <div class="handle"></div>
+                <h2>Jupiter and the Moon</h2>
+                <div class="date">September 14, 2026</div>
+                <div class="facts">
+                    A stunning conjunction where the King of Planets meets Earth's satellite. 
+                    Pinch the image to see the cloud bands of Jupiter.
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div id="drawer">
-        <div class="drawer-handle"></div>
-        <div class="drawer-content">
-            <h2 id="d-title">Scientific Details</h2>
-            <p id="d-desc">Connecting to NASA Deep Space Network...</p>
+    <section>
+        <div class="glass-card">
+            <div class="img-box">
+                <img src="https://images.weserv.nl/?url=https://apod.nasa.gov/apod/image/2309/Orion_Spitzer_960.jpg&w=600&q=75&output=webp" alt="Orion">
+            </div>
+            <div class="info-tab" tabindex="0">
+                <div class="handle"></div>
+                <h2>The Orion Nebula</h2>
+                <div class="date">September 13, 2026</div>
+                <div class="facts">
+                    A vast star-forming region located in the Milky Way. 
+                    It is one of the brightest nebulae and is visible to the naked eye.
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        const currentCard = document.getElementById('current-card');
-        const nextCard = document.getElementById('next-card');
-        const bgCanvas = document.getElementById('bg-canvas');
-        const drawer = document.getElementById('drawer');
+    <section>
+        <div class="glass-card">
+            <div class="img-box">
+                <img src="https://images.weserv.nl/?url=https://apod.nasa.gov/apod/image/2309/M31_Hubble_1080.jpg&w=600&q=75&output=webp" alt="Andromeda">
+            </div>
+            <div class="info-tab" tabindex="0">
+                <div class="handle"></div>
+                <h2>Andromeda Galaxy</h2>
+                <div class="date">September 12, 2026</div>
+                <div class="facts">
+                    Our nearest galactic neighbor. At 2.5 million light-years away, 
+                    it is the most distant object you can see with the human eye.
+                </div>
+            </div>
+        </div>
+    </section>
 
-        let startY = 0, currentY = 0, isDrawerOpen = false;
-        let currentData = null, nextData = null;
-
-        function getRandomDate() {
-            const start = new Date(2017, 0, 1).getTime();
-            const end = new Date().getTime();
-            return new Date(start + Math.random() * (end - start)).toISOString().split('T')[0];
-        }
-
-        // PRE-FETCHING ENGINE
-        async function getNASAData() {
-            try {
-                const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${getRandomDate()}`);
-                const data = await res.json();
-                return data.media_type === 'image' ? data : getNASAData();
-            } catch (e) { return null; }
-        }
-
-        async function initApp() {
-            currentData = await getNASAData();
-            updateCard(currentCard, currentData);
-            bgCanvas.src = currentData.url;
-            
-            // Background pre-fetch next one immediately
-            nextData = await getNASAData();
-            updateCard(nextCard, nextData);
-        }
-
-        function updateCard(cardElement, data) {
-            const img = cardElement.querySelector('img') || cardElement.appendChild(document.createElement('img'));
-            img.className = 'main-img';
-            img.src = data.url;
-            
-            cardElement.querySelector('h1').innerText = data.title;
-            cardElement.querySelector('p').innerText = data.date;
-        }
-
-        function toggleDrawer() {
-            isDrawerOpen = !isDrawerOpen;
-            drawer.style.transform = isDrawerOpen ? 'translateY(-70%)' : 'translateY(0)';
-        }
-
-        // GESTURE PHYSICS: VERTICAL SWIPE UP
-        currentCard.addEventListener('touchstart', e => {
-            startY = e.touches[0].clientY;
-            currentCard.style.transition = 'none';
-            nextCard.style.transition = 'none';
-        });
-
-        currentCard.addEventListener('touchmove', e => {
-            currentY = e.touches[0].clientY - startY;
-            
-            if (currentY < 0) { // Swiping Up
-                const progress = Math.abs(currentY) / window.innerHeight;
-                
-                // Current card lifts and tilts away
-                currentCard.style.transform = `translateY(${currentY}px) rotateX(${progress * 20}deg) scale(${1 - progress * 0.2})`;
-                currentCard.style.opacity = 1 - progress;
-
-                // Next card scales in from background
-                nextCard.style.opacity = progress * 1.5;
-                nextCard.style.transform = `scale(${0.9 + (progress * 0.1)}) translateY(${100 - (progress * 100)}px)`;
-            }
-        });
-
-        currentCard.addEventListener('touchend', async () => {
-            if (currentY < -150) { // SUCCESSFUL SWIPE UP
-                currentCard.style.transition = 'all 0.6s cubic-bezier(0.2, 1, 0.3, 1)';
-                currentCard.style.transform = 'translateY(-120%) scale(0.8)';
-                currentCard.style.opacity = '0';
-
-                nextCard.style.transition = 'all 0.6s cubic-bezier(0.2, 1, 0.3, 1)';
-                nextCard.style.transform = 'scale(1) translateY(0)';
-                nextCard.style.opacity = '1';
-
-                // Cycle the data
-                setTimeout(async () => {
-                    // Current becomes the "Old" one, we reset it to be the "Next" one
-                    currentCard.style.transition = 'none';
-                    currentCard.style.transform = 'scale(0.9) translateY(100px)';
-                    currentCard.style.opacity = '0';
-                    
-                    // Update UI text for the now-active card
-                    document.getElementById('d-title').innerText = nextData.title;
-                    document.getElementById('d-desc').innerText = nextData.explanation;
-                    bgCanvas.src = nextData.url;
-
-                    // Swap references
-                    let tempCard = currentCard;
-                    // Note: In a real app we'd swap IDs, but for this demo:
-                    currentData = nextData;
-                    nextData = await getNASAData();
-                    updateCard(tempCard, nextData);
-                }, 600);
-            } else {
-                // RESET
-                currentCard.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                currentCard.style.transform = 'translateY(0) rotateX(0) scale(1)';
-                currentCard.style.opacity = '1';
-                
-                if (Math.abs(currentY) < 5) toggleDrawer();
-            }
-            currentY = 0;
-        });
-
-        initApp();
-    </script>
 </body>
 </html>
