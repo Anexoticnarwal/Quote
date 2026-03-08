@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Swipe Quotes</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #38bdf8;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+        #card-container {
+            position: relative;
+            width: 85vw;
+            max-width: 380px;
+            height: 500px;
+            perspective: 1000px;
+        }
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--card);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-sizing: border-box;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.1s linear; /* Fast response while dragging */
+        }
+        .quote-text { font-size: 1.4rem; line-height: 1.4; margin-bottom: 20px; font-weight: 600; }
+        .quote-author { font-size: 1rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="card-container">
+        <div id="quote-card" class="card">
+            <div id="loader" class="loader"></div>
+            <div id="content-area">
+                <div class="quote-text" id="text">Swipe to start...</div>
+                <div class="quote-author" id="author"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('quote-card');
+        const textEl = document.getElementById('text');
+        const authorEl = document.getElementById('author');
+        const loader = document.getElementById('loader');
+        const content = document.getElementById('content-area');
+
+        let startX = 0;
+        let currentX = 0;
+
+        // FETCHING DATA FROM THE WEB
+        async function fetchQuote() {
+            loader.style.display = 'block';
+            content.style.opacity = '0';
+            
+            try {
+                // Using a reliable public random quote API
+                const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://zenquotes.io/api/random'));
+                const data = await response.json();
+                const quote = JSON.parse(data.contents)[0];
+                
+                textEl.innerText = quote.q;
+                authorEl.innerText = `- ${quote.a}`;
+            } catch (error) {
+                textEl.innerText = "Check your connection!";
+                authorEl.innerText = "- System";
+            } finally {
+                loader.style.display = 'none';
+                content.style.opacity = '1';
+            }
+        }
+
+        // SWIPE LOGIC
+        card.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+
+        card.addEventListener('touchmove', e => {
+            currentX = e.touches[0].clientX - startX;
+            card.style.transform = `translateX(${currentX}px) rotate(${currentX / 15}deg)`;
+        });
+
+        card.addEventListener('touchend', () => {
+            if (Math.abs(currentX) > 120) {
+                card.style.transition = 'transform 0.5s ease-in';
+                card.style.transform = `translateX(${currentX > 0 ? 1000 : -1000}px) rotate(${currentX / 5}deg)`;
+                
+                setTimeout(() => {
+                    fetchQuote();
+                    card.style.transition = 'none';
+                    card.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                        card.style.transform = 'scale(1)';
+                    }, 50);
+                }, 300);
+            } else {
+                card.style.transition = 'transform 0.3s ease-out';
+                card.style.transform = 'translateX(0) rotate(0)';
+            }
+            currentX = 0;
+        });
+
+        // Initial Load
+        fetchQuote();
+    </script>
+</body>
+</html>
