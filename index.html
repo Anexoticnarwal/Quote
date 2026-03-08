@@ -3,63 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Knowledge Feed</title>
+    <title>Knowledge Infinity</title>
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.08); --accent: #4fc3f7; --bg: #050508; }
+        :root { --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --bg: #030305; }
         
         body, html {
             margin: 0; padding: 0; background: var(--bg); height: 100vh;
             scroll-snap-type: y mandatory; overflow-y: scroll;
-            font-family: -apple-system, sans-serif; color: #fff;
+            font-family: 'Inter', -apple-system, sans-serif; color: #fff;
+            scrollbar-width: none;
         }
 
         /* Fixed Navigation */
         nav {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: rgba(20, 20, 25, 0.7);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 5px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; gap: 5px;
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            padding: 4px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
         nav button {
-            background: transparent; border: none; color: #fff; padding: 8px 16px;
-            border-radius: 40px; cursor: pointer; font-size: 0.7rem; font-weight: 700;
-            transition: 0.3s; opacity: 0.5;
+            background: transparent; border: none; color: #fff; padding: 10px 18px;
+            border-radius: 40px; cursor: pointer; font-size: 0.7rem; font-weight: 800;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.4; letter-spacing: 1px;
         }
 
-        nav button.active { background: var(--accent); color: #000; opacity: 1; }
+        nav button.active { background: var(--accent); color: #000; opacity: 1; transform: scale(1.05); }
 
         section { height: 100vh; width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; }
 
         .glass-card { 
-            width: 90vw; height: 82vh; background: var(--glass); 
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); 
+            width: 92vw; height: 84vh; background: var(--glass); 
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border-radius: 45px; border: 1px solid rgba(255,255,255,0.1); 
             overflow: hidden; display: flex; flex-direction: column; 
-            box-shadow: 0 40px 80px rgba(0,0,0,0.7); margin-top: 20px;
+            transition: transform 0.3s ease; text-decoration: none; color: inherit;
         }
 
-        .img-container { height: 50%; width: 100%; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .glass-card:active { transform: scale(0.98); }
 
-        .data-drawer { flex: 1; padding: 25px; background: rgba(10, 10, 15, 0.85); overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.1); }
-        h2 { margin: 0; font-size: 1.2rem; color: var(--accent); line-height: 1.3; }
-        .tag { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin: 8px 0 15px; }
-        .text { font-size: 0.9rem; line-height: 1.6; color: #ccc; }
+        .media-box { height: 48%; width: 100%; background: #000; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .media-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Creative visualization for text-only data */
+        .viz-fallback { 
+            width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; text-align: center;
+        }
+        .viz-icon { font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 0 20px var(--accent)); }
 
-        .loader { position: fixed; bottom: 40px; width: 100%; text-align: center; opacity: 0.4; font-size: 10px; letter-spacing: 3px; pointer-events: none; }
+        .data-content { flex: 1; padding: 30px; background: rgba(5, 5, 8, 0.85); overflow-y: auto; position: relative; }
+        .data-content::-webkit-scrollbar { display: none; }
+
+        h2 { margin: 0; font-size: 1.4rem; color: var(--accent); line-height: 1.2; font-weight: 800; }
+        .tag-row { display: flex; align-items: center; gap: 10px; margin: 12px 0 20px; }
+        .tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 4px; color: #fff; }
+        .description { font-size: 0.95rem; line-height: 1.7; color: #ced4da; font-weight: 400; }
+        
+        .source-hint { position: absolute; bottom: 20px; right: 30px; font-size: 0.7rem; color: var(--accent); opacity: 0.8; font-weight: 700; }
+
+        .loader { position: fixed; bottom: 30px; width: 100%; text-align: center; opacity: 0.5; font-size: 9px; letter-spacing: 4px; pointer-events: none; z-index: 5; }
     </style>
 </head>
 <body>
 
     <nav id="topicMenu">
-        <button class="active" onclick="switchTopic('science', this)">WELLCOME</button>
-        <button onclick="switchTopic('history', this)">SMITHSONIAN</button>
-        <button onclick="switchTopic('nasa', this)">NASA SEARCH</button>
+        <button class="active" onclick="switchTopic('science', this)">SCIENCE</button>
+        <button onclick="switchTopic('history', this)">HISTORY</button>
+        <button onclick="switchTopic('nature', this)">NATURE</button>
     </nav>
 
-    <div id="status" class="loader">RETRIEVING EDUCATIONAL RECORD...</div>
+    <div id="status" class="loader">INITIALIZING NEURAL LINK...</div>
     <div id="feed"></div>
 
     <script>
@@ -68,60 +85,62 @@
         let currentTopic = 'science';
         let isLoading = false;
 
-        const sources = {
+        const topics = {
             science: {
-                // Wellcome Collection: Medicine, Science, and Life
+                // arXiv: Open-access scientific papers (Text-heavy/Visual fallback)
                 async fetch() {
-                    const page = Math.floor(Math.random() * 50) + 1;
-                    const res = await fetch(`https://api.wellcomecollection.org/catalogue/v2/works?pageSize=1&page=${page}&include=images`);
-                    const d = await res.json();
-                    const item = d.results[0];
-                    if (!item || !item.thumbnail) return null;
+                    const terms = ['physics', 'astronomy', 'biology', 'quantum'];
+                    const q = terms[Math.floor(Math.random()*terms.length)];
+                    const res = await fetch(`https://export.arxiv.org/api/query?search_query=all:${q}&max_results=50`);
+                    const text = await res.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(text, "text/xml");
+                    const entries = xmlDoc.getElementsByTagName("entry");
+                    const item = entries[Math.floor(Math.random() * entries.length)];
+                    
                     return {
-                        title: item.title,
-                        img: item.thumbnail.url,
-                        text: item.description || "Medical and scientific history record from the Wellcome archives.",
-                        tag: "Wellcome Collection: Science & Life"
+                        title: item.getElementsByTagName("title")[0].textContent,
+                        desc: item.getElementsByTagName("summary")[0].textContent.substring(0, 450) + "...",
+                        link: item.getElementsByTagName("id")[0].textContent,
+                        tag: "ARXIV SCIENTIFIC REPOSITORY",
+                        icon: "⚛️",
+                        type: 'viz'
                     };
                 }
             },
             history: {
-                // Smithsonian: Open Access Natural History & Culture
+                // Europeana: High-quality historical records
                 async fetch() {
-                    const topics = ['natural history', 'fossils', 'minerals', 'photography'];
-                    const q = topics[Math.floor(Math.random()*topics.length)];
-                    // Use a random offset to find a unique item
-                    const start = Math.floor(Math.random() * 100);
-                    const res = await fetch(`https://collections.nmnh.si.edu/search/results.php?q=${q}&count=1&view=json&start=${start}`);
-                    // Note: This is a simplified fetch; actual Smithsonian API often requires headers
-                    // Replacing with a highly stable alternative if direct fetch fails:
-                    const resAlt = await fetch(`https://api.artic.edu/api/v1/artworks/search?q=${q}&limit=1&fields=id,title,image_id,thumbnail`);
-                    const d = await resAlt.json();
-                    const item = d.data[0];
-                    if (!item || !item.image_id) return null;
+                    const res = await fetch(`https://api.europeana.eu/record/v2/search.json?wskey=api2demo&query=NOTATION&rows=1&start=${Math.floor(Math.random()*100)}&media=true`);
+                    const d = await res.json();
+                    const item = d.items[0];
+                    if (!item || !item.edmPreview) return null;
                     return {
-                        title: item.title,
-                        img: `https://www.artic.edu/iiif/2/${item.image_id}/full/843,/0/default.jpg`,
-                        text: item.thumbnail?.alt_text || "Educational artifact from world history collections.",
-                        tag: "Global History Archive"
+                        title: item.title[0],
+                        desc: (item.dcDescription ? item.dcDescription[0] : "A preserved historical record documenting cultural development.") + " This artifact represents a significant point in the human timeline.",
+                        img: item.edmPreview[0],
+                        link: item.guid,
+                        tag: "EUROPEANA CULTURAL ARCHIVE",
+                        type: 'img'
                     };
                 }
             },
-            nasa: {
-                // NASA Images Library (Stable Search API)
+            nature: {
+                // Biodiversity Heritage Library via OpenLibrary / Cross-ref
                 async fetch() {
-                    const keywords = ['nebula', 'planet', 'apollo', 'mars', 'galaxy'];
-                    const q = keywords[Math.floor(Math.random()*keywords.length)];
-                    const res = await fetch(`https://images-api.nasa.gov/search?q=${q}&media_type=image`);
+                    const queries = ['evolution', 'species', 'ecosystem', 'botany'];
+                    const q = queries[Math.floor(Math.random()*queries.length)];
+                    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=50`);
                     const d = await res.json();
-                    const items = d.collection.items;
-                    const item = items[Math.floor(Math.random() * items.length)];
-                    if (!item || !item.links || !item.links[0].href) return null;
+                    const item = d.docs[Math.floor(Math.random() * d.docs.length)];
+                    if (!item.cover_i) return null;
                     return {
-                        title: item.data[0].title,
-                        img: item.links[0].href,
-                        text: item.data[0].description || "No further description available from NASA metadata.",
-                        tag: "NASA Image Repository"
+                        title: item.title,
+                        desc: `A comprehensive study regarding ${q}. This work explores the biological complexities and historical context of natural systems as documented in global scientific libraries.`,
+                        img: `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg`,
+                        link: `https://openlibrary.org${item.key}`,
+                        tag: "NATURAL KNOWLEDGE REPOSITORY",
+                        type: 'img'
                     };
                 }
             }
@@ -134,26 +153,27 @@
 
             try {
                 let data = null;
-                while (!data) { data = await sources[currentTopic].fetch(); }
+                while (!data) { data = await topics[currentTopic].fetch(); }
 
                 const section = document.createElement('section');
+                const mediaHtml = data.type === 'img' 
+                    ? `<img src="${data.img}" loading="lazy">` 
+                    : `<div class="viz-fallback"><div class="viz-icon">${data.icon}</div><div style="opacity:0.5; font-size:0.7rem">ACADEMIC DATA VISUALIZATION</div></div>`;
+
                 section.innerHTML = `
-                    <div class="glass-card">
-                        <div class="img-container"><img src="${data.img}" loading="lazy"></div>
-                        <div class="data-drawer">
+                    <a href="${data.link}" target="_blank" class="glass-card">
+                        <div class="media-box">${mediaHtml}</div>
+                        <div class="data-content">
+                            <div class="tag-row"><span class="tag">${data.tag}</span></div>
                             <h2>${data.title}</h2>
-                            <p class="tag">${data.tag}</p>
-                            <p class="text">${data.text}</p>
+                            <p class="description">${data.desc}</p>
+                            <span class="source-hint">TAP TO EXPLORE SOURCE →</span>
                         </div>
-                    </div>
+                    </a>
                 `;
                 feed.appendChild(section);
-            } catch (err) {
-                console.warn("Retrying fetch...");
-            } finally {
-                isLoading = false;
-                status.style.display = 'none';
-            }
+            } catch (err) { console.error("Fetch glitch, retrying..."); } 
+            finally { isLoading = false; status.style.display = 'none'; }
         }
 
         function switchTopic(topic, btn) {
@@ -165,14 +185,10 @@
             init();
         }
 
-        async function init() {
-            for (let i = 0; i < 3; i++) await createSlide();
-        }
+        async function init() { for (let i = 0; i < 3; i++) await createSlide(); }
 
         window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
-                createSlide();
-            }
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) createSlide();
         });
 
         init();
