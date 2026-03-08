@@ -2,144 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmos Lite Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cosmos Infinity</title>
     <style>
+        :root { --glass: rgba(255, 255, 255, 0.08); --accent: #4fc3f7; }
+        
         body, html {
-            margin: 0; padding: 0;
-            background: #000;
-            height: 100vh;
-            scroll-snap-type: y mandatory;
-            overflow-y: scroll;
-            -webkit-overflow-scrolling: touch;
-            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0; padding: 0; background: #000; height: 100vh;
+            scroll-snap-type: y mandatory; overflow-y: scroll;
+            -webkit-overflow-scrolling: touch; font-family: -apple-system, sans-serif; color: #fff;
         }
 
-        section {
-            height: 100vh;
-            width: 100%;
-            scroll-snap-align: start;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+        /* Container for all the slides we will generate */
+        #feed { width: 100%; }
+
+        section { 
+            height: 100vh; width: 100%; scroll-snap-align: start; 
+            display: flex; align-items: center; justify-content: center; 
         }
 
-        .glass-card {
-            width: 90vw;
-            height: 82vh;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 35px;
-            border: 1px solid rgba(255,255,255,0.15);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        .glass-card { 
+            width: 92vw; height: 86vh; background: var(--glass); 
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); 
+            overflow: hidden; display: flex; flex-direction: column; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
         }
 
-        /* Image Box - Optimized for 0.8s load & Pinch-to-Zoom */
-        .img-box {
-            flex: 1;
-            overflow: auto; 
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .img-container { 
+            height: 50%; width: 100%; background: #000; 
+            overflow: auto; display: flex; align-items: center; justify-content: center; 
         }
 
-        .img-box img {
-            max-width: 100%;
-            height: auto;
-            display: block;
+        .img-container img { max-width: 100%; height: auto; display: block; }
+
+        .data-drawer { 
+            flex: 1; padding: 25px; background: rgba(10, 10, 15, 0.85); 
+            overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* The Slide-Up Info Tab (Pure CSS) */
-        .info-tab {
-            padding: 20px;
-            background: rgba(20, 20, 20, 0.9);
-            color: #fff;
-            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            cursor: pointer;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
+        h2 { margin: 0; font-size: 1.3rem; color: var(--accent); }
+        .tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin: 5px 0 12px; }
+        .text { font-size: 0.9rem; line-height: 1.6; color: #ccc; }
 
-        /* Tap to Expand Effect */
-        .info-tab:active, .info-tab:focus {
-            transform: translateY(-50px);
-        }
-
-        .handle {
-            width: 40px; height: 4px; background: rgba(255,255,255,0.3);
-            border-radius: 10px; margin: 0 auto 15px;
-        }
-
-        h2 { margin: 0; font-size: 1.2rem; color: #4fc3f7; }
-        .date { font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-        .facts { font-size: 0.85rem; line-height: 1.5; margin-top: 15px; opacity: 0.9; }
-
-        .swipe-tip {
-            position: fixed; top: env(safe-area-inset-top, 20px); width: 100%;
-            text-align: center; color: #fff; font-size: 10px;
-            letter-spacing: 3px; opacity: 0.4; pointer-events: none; z-index: 10;
-        }
+        .loader-text { position: fixed; top: 50%; width: 100%; text-align: center; opacity: 0.5; font-size: 12px; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
-    <div class="swipe-tip">UP FOR NEXT • PINCH TO ZOOM</div>
-
-    <section>
-        <div class="glass-card">
-            <div class="img-box">
-                <img src="https://images.weserv.nl/?url=https://apod.nasa.gov/apod/image/2309/MoonJupiter_Zhu_1080.jpg&w=600&q=75&output=webp" alt="Jupiter and Moon">
-            </div>
-            <div class="info-tab" tabindex="0">
-                <div class="handle"></div>
-                <h2>Jupiter and the Moon</h2>
-                <div class="date">September 14, 2026</div>
-                <div class="facts">
-                    A stunning conjunction where the King of Planets meets Earth's satellite. 
-                    Pinch the image to see the cloud bands of Jupiter.
-                </div>
-            </div>
+    <div id="feed">
         </div>
-    </section>
 
-    <section>
-        <div class="glass-card">
-            <div class="img-box">
-                <img src="https://images.weserv.nl/?url=https://apod.nasa.gov/apod/image/2309/Orion_Spitzer_960.jpg&w=600&q=75&output=webp" alt="Orion">
-            </div>
-            <div class="info-tab" tabindex="0">
-                <div class="handle"></div>
-                <h2>The Orion Nebula</h2>
-                <div class="date">September 13, 2026</div>
-                <div class="facts">
-                    A vast star-forming region located in the Milky Way. 
-                    It is one of the brightest nebulae and is visible to the naked eye.
-                </div>
-            </div>
-        </div>
-    </section>
+    <div id="status" class="loader-text">INITIALIZING DEEP SPACE LINK...</div>
 
-    <section>
-        <div class="glass-card">
-            <div class="img-box">
-                <img src="https://images.weserv.nl/?url=https://apod.nasa.gov/apod/image/2309/M31_Hubble_1080.jpg&w=600&q=75&output=webp" alt="Andromeda">
-            </div>
-            <div class="info-tab" tabindex="0">
-                <div class="handle"></div>
-                <h2>Andromeda Galaxy</h2>
-                <div class="date">September 12, 2026</div>
-                <div class="facts">
-                    Our nearest galactic neighbor. At 2.5 million light-years away, 
-                    it is the most distant object you can see with the human eye.
-                </div>
-            </div>
-        </div>
-    </section>
+    <script>
+        const feed = document.getElementById('feed');
+        const status = document.getElementById('status');
 
+        // Function to create a random date string
+        function getRandomDate() {
+            const start = new Date(2015, 0, 1).getTime();
+            const end = new Date().getTime();
+            return new Date(start + Math.random() * (end - start)).toISOString().split('T')[0];
+        }
+
+        // The "Factory" that builds a new slide
+        async function createSlide() {
+            try {
+                const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${getRandomDate()}`);
+                const data = await response.json();
+
+                // If it's a video, skip and try again
+                if (data.media_type !== 'image') return createSlide();
+
+                // Create the HTML structure for the new slide
+                const section = document.createElement('section');
+                section.innerHTML = `
+                    <div class="glass-card">
+                        <div class="img-container">
+                            <img src="${data.url}" alt="${data.title}">
+                        </div>
+                        <div class="data-drawer">
+                            <h2>${data.title}</h2>
+                            <p class="tag">${data.date} • NASA ARCHIVE</p>
+                            <p class="text">${data.explanation}</p>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(section);
+                status.style.display = 'none'; // Hide the loading text once first slide is in
+            } catch (err) {
+                console.error("NASA Link Interrupted");
+            }
+        }
+
+        // INITIAL LOAD: Create 5 slides immediately
+        async function init() {
+            for (let i = 0; i < 5; i++) {
+                await createSlide();
+            }
+        }
+
+        // INFINITE SCROLL: When you get near the bottom, make 2 more slides
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                createSlide();
+                createSlide();
+            }
+        });
+
+        init();
+    </script>
 </body>
 </html>
