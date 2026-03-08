@@ -3,35 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity Knowledge</title>
+    <title>Curriculum Infinity</title>
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --bg: #010103; }
+        :root { --glass: rgba(255, 255, 255, 0.05); --accent: #00e5ff; --bg: #010103; }
         
         body, html {
             margin: 0; padding: 0; background: var(--bg); height: 100vh;
             scroll-snap-type: y mandatory; overflow-y: scroll;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #fff;
+            font-family: 'Inter', system-ui, sans-serif; color: #fff;
             scrollbar-width: none;
         }
 
-        /* Ambient Background */
+        /* Animated Backdrop */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #010103 100%);
+            background: radial-gradient(circle at 20% 30%, #0a0a1a 0%, #010103 100%);
             z-index: -1;
         }
 
         nav {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 1000; background: rgba(10, 10, 15, 0.9);
-            backdrop-filter: blur(25px); padding: 5px; border-radius: 50px;
+            backdrop-filter: blur(25px); padding: 4px; border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.1); display: flex;
+            max-width: 95vw; overflow-x: auto; scrollbar-width: none;
         }
 
         nav button {
-            background: transparent; border: none; color: #fff; padding: 10px 18px;
-            border-radius: 40px; cursor: pointer; font-size: 0.7rem; font-weight: 800;
-            transition: 0.3s; opacity: 0.4; letter-spacing: 1px;
+            background: transparent; border: none; color: #fff; padding: 8px 14px;
+            border-radius: 40px; cursor: pointer; font-size: 0.65rem; font-weight: 800;
+            transition: 0.3s; opacity: 0.4; white-space: nowrap; letter-spacing: 1px;
         }
 
         nav button.active { background: var(--accent); color: #000; opacity: 1; }
@@ -39,70 +40,67 @@
         section { height: 100vh; width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; }
 
         .glass-card { 
-            width: 92vw; height: 86vh; background: var(--glass); 
+            width: 92vw; height: 84vh; background: var(--glass); 
             backdrop-filter: blur(50px); border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); 
             overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: inherit;
         }
 
         .media-box { height: 40%; width: 100%; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .media-box img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .data-content { flex: 1; padding: 30px; background: rgba(5, 5, 10, 0.8); overflow-y: auto; }
-        
-        .edu-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-        h2 { margin: 0; font-size: 1.3rem; color: var(--accent); line-height: 1.2; flex: 1; }
-        .edu-badge { font-size: 0.6rem; background: var(--accent); color: #000; padding: 4px 10px; border-radius: 4px; font-weight: 900; margin-left: 10px; white-space: nowrap; }
+        .viz-box { width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-        .tag-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tag { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 4px; color: #fff; opacity: 0.7; }
-
-        .knowledge-section { margin-bottom: 20px; border-left: 2px solid var(--accent); padding-left: 15px; }
-        .knowledge-label { font-size: 0.65rem; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .description { font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; }
+        .data-content { flex: 1; padding: 25px; background: rgba(5, 5, 10, 0.85); overflow-y: auto; }
         
-        .source-footer { margin-top: auto; font-size: 0.7rem; color: var(--accent); font-weight: 700; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        h2 { margin: 0; font-size: 1.2rem; color: var(--accent); line-height: 1.2; font-weight: 800; }
+        .subject-tag { font-size: 0.55rem; background: var(--accent); color: #000; padding: 3px 8px; border-radius: 4px; font-weight: 900; }
 
-        .loader { position: fixed; bottom: 30px; width: 100%; text-align: center; opacity: 0.4; font-size: 9px; letter-spacing: 4px; z-index: 5; pointer-events: none; }
+        .info-block { margin: 15px 0; border-left: 2px solid var(--accent); padding-left: 15px; }
+        .label { font-size: 0.6rem; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .desc { font-size: 0.88rem; line-height: 1.6; color: #cbd5e0; margin-top: 5px; }
+        
+        .footer { margin-top: auto; font-size: 0.65rem; color: var(--accent); font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+
+        .loader { position: fixed; bottom: 30px; width: 100%; text-align: center; opacity: 0.4; font-size: 8px; letter-spacing: 4px; z-index: 5; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <nav id="topicMenu">
-        <button class="active" onclick="switchTopic('space', this)">COSMOS</button>
-        <button onclick="switchTopic('nature', this)">BIOLOGY</button>
-        <button onclick="switchTopic('history', this)">HISTORY</button>
+        <button class="active" onclick="switchTopic('physics', this)">PHYSICS</button>
+        <button onclick="switchTopic('biology', this)">BIOLOGY</button>
+        <button onclick="switchTopic('geo', this)">GEOGRAPHY</button>
+        <button onclick="switchTopic('history', this)">ART HISTORY</button>
+        <button onclick="switchTopic('lit', this)">LITERATURE</button>
     </nav>
 
-    <div id="status" class="loader">DECODING REPOSITORY...</div>
+    <div id="status" class="loader">DECODING CURRICULUM DATA...</div>
     <div id="feed"></div>
 
     <script>
         const feed = document.getElementById('feed');
         const status = document.getElementById('status');
-        let currentTopic = 'space';
+        let currentTopic = 'physics';
         let isLoading = false;
 
-        const sources = {
-            space: {
+        const curriculum = {
+            physics: {
                 async fetch() {
-                    const terms = ['Hubble', 'Exoplanet', 'Supernova', 'Black Hole'];
-                    const q = terms[Math.floor(Math.random()*terms.length)];
-                    const res = await fetch(`https://images-api.nasa.gov/search?q=${q}&media_type=image`);
+                    const res = await fetch(`https://images-api.nasa.gov/search?q=space&media_type=image`);
                     const d = await res.json();
-                    const item = d.collection.items[Math.floor(Math.random()*15)];
-                    if (!item) return null;
+                    const item = d.collection.items[Math.floor(Math.random()*30)];
                     return {
                         title: item.data[0].title,
                         img: item.links[0].href,
-                        badge: "ASTRONOMY",
-                        label: "SCIENTIFIC CONTEXT",
-                        desc: item.data[0].description.split('. ').slice(0, 4).join('. ') + '.',
+                        subject: "PHYSICS / ASTRONOMY",
+                        label: "SCIENTIFIC OBSERVATION",
+                        desc: item.data[0].description.split('. ').slice(0, 3).join('. ') + '.',
                         link: `https://images.nasa.gov/details-${item.data[0].nasa_id}`,
-                        tag: "NASA DATASET"
+                        source: "NASA GOV"
                     };
                 }
             },
-            nature: {
+            biology: {
                 async fetch() {
                     const res = await fetch(`https://www.fishwatch.gov/api/species`);
                     const d = await res.json();
@@ -110,28 +108,63 @@
                     return {
                         title: item['Species Name'],
                         img: item['Species Images'] ? item['Species Images'][0]?.src : null,
-                        badge: "BIOLOGY",
-                        label: "SPECIES INSIGHT",
-                        desc: `<b>Habitat:</b> ${item['Habitat'] ? item['Habitat'].replace(/<[^>]*>/g, '').substring(0, 150) : 'Oceanic'}. <br><br><b>Biology:</b> ${item['Biology'] ? item['Biology'].replace(/<[^>]*>/g, '').substring(0, 300) : 'Marine life details.'}...`,
+                        subject: "BIOLOGY / ECOLOGY",
+                        label: "BIOLOGICAL STUDY",
+                        desc: `<b>Biology:</b> ${item['Biology'] ? item['Biology'].replace(/<[^>]*>/g, '').substring(0, 300) : 'Ecosystem details.'}...`,
                         link: `https://www.fishwatch.gov/profiles/${item['Species Name'].toLowerCase().replace(/ /g, '-')}`,
-                        tag: "NOAA FISHERIES"
+                        source: "NOAA FISHERIES"
+                    };
+                }
+            },
+            geo: {
+                async fetch() {
+                    const res = await fetch(`https://restcountries.com/v3.1/all`);
+                    const d = await res.json();
+                    const item = d[Math.floor(Math.random() * d.length)];
+                    return {
+                        title: item.name.common,
+                        img: item.flags.svg,
+                        subject: "GEOGRAPHY",
+                        label: "GLOBAL STATS",
+                        desc: `${item.name.common} is located in ${item.subregion}. Population: ${item.population.toLocaleString()}. Continent: ${item.continents[0]}. Coordinates: ${item.latlng.join(', ')}.`,
+                        link: `https://www.google.com/maps/search/${item.name.common}`,
+                        source: "UN DATASET"
                     };
                 }
             },
             history: {
                 async fetch() {
-                    const id = Math.floor(Math.random() * 480000) + 1;
+                    const id = Math.floor(Math.random() * 400000) + 1;
                     const res = await fetch(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`);
                     const d = await res.json();
-                    if (!d.primaryImageSmall || !d.title) return null;
+                    if (!d.primaryImageSmall) return null;
                     return {
                         title: d.title,
                         img: d.primaryImageSmall,
-                        badge: "HISTORY",
-                        label: "HISTORICAL SIGNIFICANCE",
-                        desc: `This artifact originates from the ${d.culture || 'World'} culture, dated approximately to ${d.objectDate || 'Unknown'}. It was crafted using ${d.medium || 'traditional materials'} and belongs to the ${d.department} collection.`,
+                        subject: "ART HISTORY",
+                        label: "CULTURAL CONTEXT",
+                        desc: `This piece represents the ${d.culture || 'Global'} period (${d.objectDate || 'Unknown Date'}). It highlights the use of ${d.medium} in historical expression.`,
                         link: d.objectURL,
-                        tag: "MET ARCHIVE"
+                        source: "THE MET MUSEUM"
+                    };
+                }
+            },
+            lit: {
+                async fetch() {
+                    const genres = ['philosophy', 'poetry', 'fiction'];
+                    const q = genres[Math.floor(Math.random()*genres.length)];
+                    const res = await fetch(`https://openlibrary.org/search.json?subject=${q}&limit=50`);
+                    const d = await res.json();
+                    const item = d.docs[Math.floor(Math.random()*d.docs.length)];
+                    if (!item.cover_i) return null;
+                    return {
+                        title: item.title,
+                        img: `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg`,
+                        subject: "LITERATURE",
+                        label: "LITERARY ANALYSIS",
+                        desc: `Written by ${item.author_name ? item.author_name[0] : 'Unknown Author'}. This work is a significant entry in the ${q} category, exploring themes prevalent in its publication era.`,
+                        link: `https://openlibrary.org${item.key}`,
+                        source: "OPEN LIBRARY"
                     };
                 }
             }
@@ -144,35 +177,32 @@
 
             try {
                 let data = null;
-                while (!data) { data = await sources[currentTopic].fetch(); }
+                while (!data) { data = await curriculum[currentTopic].fetch(); }
 
                 const section = document.createElement('section');
                 section.innerHTML = `
                     <a href="${data.link}" target="_blank" class="glass-card">
                         <div class="media-box">
-                            <img src="${data.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/800x400/000/fff?text=Source+Image'">
+                            <img src="${data.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/800x400/000/fff?text=Visual+Data+Unavailable'">
                         </div>
                         <div class="data-content">
-                            <div class="edu-header">
+                            <div class="header-row">
                                 <h2>${data.title}</h2>
-                                <span class="edu-badge">${data.badge}</span>
+                                <span class="subject-tag">${data.subject}</span>
                             </div>
-                            <div class="tag-row">
-                                <span class="tag">${data.tag}</span>
+                            <div class="info-block">
+                                <span class="label">${data.label}</span>
+                                <div class="desc">${data.desc}</div>
                             </div>
-                            <div class="knowledge-section">
-                                <span class="knowledge-label">${data.label}</span>
-                                <div class="description">${data.desc}</div>
-                            </div>
-                            <div class="source-footer">
-                                <span>TAP TO LEARN MORE</span>
-                                <span>VERIFIED SOURCE →</span>
+                            <div class="footer">
+                                <span>VERIFIED: ${data.source}</span>
+                                <span>TAP FOR FULL MODULE →</span>
                             </div>
                         </div>
                     </a>
                 `;
                 feed.appendChild(section);
-            } catch (err) { console.warn("Retrying fetch..."); } 
+            } catch (err) { console.warn("Syncing..."); } 
             finally { isLoading = false; status.style.display = 'none'; }
         }
 
